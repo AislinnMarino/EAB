@@ -1,0 +1,6 @@
+{
+    "oracle_config_search_drive": "C",
+    "oracle_config_location": "C:\\oracle\\product\\12.2.0\\client_1\\network\\admin",
+    "infosource_prd_output_directory": ".\\infosource-prd-output",
+    "infosource_dev_output_directory": ".\\infosource-dev-output"
+}
