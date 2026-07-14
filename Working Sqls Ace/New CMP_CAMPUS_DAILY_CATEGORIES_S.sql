@@ -1,3 +1,5 @@
+/* new changes
+seeing version history now*/
 SELECT /*+ PARALLEL(4) */
             -- The scrub view logic is supported by the Student Solutions Team
  -- Data Access and Reporting suppots the Dataload and will report any issues to the Student Solutions Team
