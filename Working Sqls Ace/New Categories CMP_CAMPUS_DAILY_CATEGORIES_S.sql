@@ -1,4 +1,14 @@
 /* new categories being added 7-14-2026 Ace Marino*/
+
+/*what am I missing access too*/
+select * from PS_RPT.PS_STDNT_TEST_COMP_V where 1=0; --bad
+select * from PS_RPT.PS_FERPA_OVERRIDE_V where 1=0;--bad
+select * from PS_RPT.LOK_ACAD_PROG_V where 1=0;--bad
+select * from PS_RPT.STUDENTTERM_CUR_V where 1=0;--bad
+select * from PS_RPT.PS_AA_OVERRIDE_V where 1=0;--bad
+select * from PS_RPT.LOK_ACAD_PLAN_V where 1=0;--bad
+select * from PS_RPT.PS_EXT_ACAD_SUM_V where 1=0;--bad
+select * from PS_RPT.PS_PERSON_CHECKLST_V where 1=0;--bad
 SELECT /*+ PARALLEL(4) */
             -- The scrub view logic is supported by the Student Solutions Team
  -- Data Access and Reporting suppots the Dataload and will report any issues to the Student Solutions Team
@@ -3519,4 +3529,17 @@ SELECT /*+ PARALLEL(4) */
                   FROM PS_RPT.PS_STDNT_ADVR_HIST_V b
                  WHERE     a.emplid = b.emplid
                        AND a.institution = b.institution
-                       AND a.advisor_role = b.advisor_role)
+                       AND a.advisor_role = b.advisor_role);
+
+    select * from ps_rpt.PS_SRVC_IND_DATA_v ;
+
+-- pell grant
+     SELECT population.EMPLID AS STUDENT_ID, 'PELL' AS CATEGORY_ID
+      FROM ps_rpt.cmp_POPULATION_CURRENT_V  population
+           --criteria here
+           ;
+--No Test Scores Transcripts
+     SELECT population.EMPLID AS STUDENT_ID, 'NOTT' AS CATEGORY_ID
+      FROM ps_rpt.cmp_POPULATION_CURRENT_V  population
+           --criteria here
+           ;
