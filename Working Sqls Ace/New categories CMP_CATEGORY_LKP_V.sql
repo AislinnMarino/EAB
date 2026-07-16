@@ -906,4 +906,16 @@ SELECT 'ATHL'                           AS Category_ID,
            'AI Undergraduate Majors - Includes Spec Pop'     AS Category_Desc,
            'UB'                          AS GROUP_ID
       FROM DUAL
+      UNION
+      /* new categories*/
+ SELECT 'PELL'                        AS Category_ID,
+           'Pell Grant'     AS Category_Desc,
+           'UB'                          AS GROUP_ID
+      FROM DUAL
+      UNION
+ SELECT 'NOTT'                        AS Category_ID,
+           'No Test Scores Transcripts'     AS Category_Desc,
+           'UB'                          AS GROUP_ID
+      FROM DUAL
+      
     ORDER BY Category_Desc
