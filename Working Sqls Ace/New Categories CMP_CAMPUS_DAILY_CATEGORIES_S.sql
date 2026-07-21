@@ -3531,15 +3531,178 @@ SELECT /*+ PARALLEL(4) */
                        AND a.institution = b.institution
                        AND a.advisor_role = b.advisor_role);
 
-    select * from ps_rpt.PS_SRVC_IND_DATA_v ;
 
--- pell grant
-     SELECT population.EMPLID AS STUDENT_ID, 'PELL' AS CATEGORY_ID
-      FROM ps_rpt.cmp_POPULATION_CURRENT_V  population
-           --criteria here
-           ;
---No Test Scores Transcripts
-     SELECT population.EMPLID AS STUDENT_ID, 'NOTT' AS CATEGORY_ID
-      FROM ps_rpt.cmp_POPULATION_CURRENT_V  population
-           --criteria here
-           ;
+--new
+-- pell with daily
+     With P_Daily as(
+     -- pell grant
+     SELECT
+    population.EMPLID AS STUDENT_ID,
+    ('PELL ELIG- ' | | PLL.AID_YEAR) AS CATEGORY_ID
+FROM
+    ps_rpt.cmp_POPULATION_CURRENT_V population
+    INNER JOIN (
+        SELECT
+            A.EMPLID,
+            A.INSTITUTION,
+            A.AID_YEAR,
+            --- T.SOURCEKEY TERM_CODE,
+            A.PELL_ELIGIBILITY
+        FROM
+            ps_rpt.PS_ISIR_CONTROL A
+            --- INNER JOIN PS_RPT.LOK_TERM_V T ON A.AID_YEAR = T.ACADEMICYEAR
+        WHERE
+            A.EFFDT = (
+                SELECT
+                    MAX(A_ED.EFFDT)
+                FROM
+                    ps_rpt.PS_ISIR_CONTROL A_ED
+                WHERE
+                    A.EMPLID = A_ED.EMPLID
+                    AND A.INSTITUTION = A_ED.INSTITUTION
+                    AND A.AID_YEAR = A_ED.AID_YEAR
+                    AND A_ED.EFFDT <= SYSDATE
+            )
+            AND A.EFFSEQ = (
+                SELECT
+                    MAX(A_ES.EFFSEQ)
+                FROM
+                    ps_rpt.PS_ISIR_CONTROL A_ES
+                WHERE
+                    A.EMPLID = A_ES.EMPLID
+                    AND A.INSTITUTION = A_ES.INSTITUTION
+                    AND A.AID_YEAR = A_ES.AID_YEAR
+                    AND A.EFFDT = A_ES.EFFDT
+            )
+            ---AND A.AID_YEAR = '2025'
+            AND A.PELL_ELIGIBILITY = 'Y'
+    ) PLL ON population.EMPLID = PLL.EMPLID 
+    Union 
+    Select * from ps_rpt.cmp_campus_daily_categories_S) 
+     select count(*) from P_Daily;
+
+
+--no tests /transcripts with daily
+ With NTP_Daily as(
+     -- no test scores/transcripts grant
+     SELECT
+    population.EMPLID AS STUDENT_ID,
+    'NPCC' AS CATEGORY_ID
+FROM
+    ps_rpt.cmp_POPULATION_CURRENT_V population
+    INNER JOIN (
+        SELECT
+            t1.EMPLOYEEID
+        FROM
+            PS_RPT.STUDENTTERM_V t1
+        WHERE
+            t1.INSTITUTIONSOURCEKEY = 'UBFLO'
+            AND t1.ADMITTYPESOURCEKEY IN ('001', '003')
+            AND t1.CAREERSOURCEKEY = t1.BILLINGCAREER
+            AND t1.CAREERSOURCEKEY = 'UGRD'
+            AND t1.TERMSOURCEKEY = t1.ADMITTERM
+            AND t1.ENROLLEDINDICATOR = 'Enrolled'
+            AND (t1.PSUNITSTESTCREDIT + t1.TERMTRANSFERCREDITS) = 0
+            AND NOT EXISTS (
+                SELECT
+                    'X'
+                FROM
+                    PS_RPT.STUDENTTERM_V t2
+                WHERE
+                    t2.INSTITUTIONSOURCEKEY = 'UBFLO'
+                    AND t2.CAREERSOURCEKEY = 'UGRD'
+                    AND t2.ENROLLEDINDICATOR = 'Enrolled'
+                    AND t2.PLANSOURCEKEY IN ('GIM074X3', 'ACP074R3')
+                    AND t2.EMPLOYEEID = t1.EMPLOYEEID
+                    AND t2.INSTITUTIONSOURCEKEY = t1.INSTITUTIONSOURCEKEY
+                    AND t2.CAREERSOURCEKEY = t1.CAREERSOURCEKEY
+            )
+    ) NPCC ON population.EMPLID = NPCC.EMPLOYEEID 
+    Union 
+    Select * from ps_rpt.cmp_campus_daily_categories_S) 
+     select count(*) from NT_Daily;
+
+
+     -- both pell and nott with daily
+     With NTP_Daily as(
+     -- no test scores/transcripts grant
+     SELECT
+    population.EMPLID AS STUDENT_ID,
+    'NPCC' AS CATEGORY_ID
+FROM
+    ps_rpt.cmp_POPULATION_CURRENT_V population
+    INNER JOIN (
+        SELECT
+            t1.EMPLOYEEID
+        FROM
+            PS_RPT.STUDENTTERM_V t1
+        WHERE
+            t1.INSTITUTIONSOURCEKEY = 'UBFLO'
+            AND t1.ADMITTYPESOURCEKEY IN ('001', '003')
+            AND t1.CAREERSOURCEKEY = t1.BILLINGCAREER
+            AND t1.CAREERSOURCEKEY = 'UGRD'
+            AND t1.TERMSOURCEKEY = t1.ADMITTERM
+            AND t1.ENROLLEDINDICATOR = 'Enrolled'
+            AND (t1.PSUNITSTESTCREDIT + t1.TERMTRANSFERCREDITS) = 0
+            AND NOT EXISTS (
+                SELECT
+                    'X'
+                FROM
+                    PS_RPT.STUDENTTERM_V t2
+                WHERE
+                    t2.INSTITUTIONSOURCEKEY = 'UBFLO'
+                    AND t2.CAREERSOURCEKEY = 'UGRD'
+                    AND t2.ENROLLEDINDICATOR = 'Enrolled'
+                    AND t2.PLANSOURCEKEY IN ('GIM074X3', 'ACP074R3')
+                    AND t2.EMPLOYEEID = t1.EMPLOYEEID
+                    AND t2.INSTITUTIONSOURCEKEY = t1.INSTITUTIONSOURCEKEY
+                    AND t2.CAREERSOURCEKEY = t1.CAREERSOURCEKEY
+            )
+    ) NPCC ON population.EMPLID = NPCC.EMPLOYEEID 
+    Union 
+    Select * from ps_rpt.cmp_campus_daily_categories_S
+Union
+    --pell
+    SELECT
+    population.EMPLID AS STUDENT_ID,
+    ('PELL ELIG- ' | | PLL.AID_YEAR) AS CATEGORY_ID
+FROM
+    ps_rpt.cmp_POPULATION_CURRENT_V population
+    INNER JOIN (
+        SELECT
+            A.EMPLID,
+            A.INSTITUTION,
+            A.AID_YEAR,
+            --- T.SOURCEKEY TERM_CODE,
+            A.PELL_ELIGIBILITY
+        FROM
+            ps_rpt.PS_ISIR_CONTROL A
+            --- INNER JOIN PS_RPT.LOK_TERM_V T ON A.AID_YEAR = T.ACADEMICYEAR
+        WHERE
+            A.EFFDT = (
+                SELECT
+                    MAX(A_ED.EFFDT)
+                FROM
+                    ps_rpt.PS_ISIR_CONTROL A_ED
+                WHERE
+                    A.EMPLID = A_ED.EMPLID
+                    AND A.INSTITUTION = A_ED.INSTITUTION
+                    AND A.AID_YEAR = A_ED.AID_YEAR
+                    AND A_ED.EFFDT <= SYSDATE
+            )
+            AND A.EFFSEQ = (
+                SELECT
+                    MAX(A_ES.EFFSEQ)
+                FROM
+                    ps_rpt.PS_ISIR_CONTROL A_ES
+                WHERE
+                    A.EMPLID = A_ES.EMPLID
+                    AND A.INSTITUTION = A_ES.INSTITUTION
+                    AND A.AID_YEAR = A_ES.AID_YEAR
+                    AND A.EFFDT = A_ES.EFFDT
+            )
+            ---AND A.AID_YEAR = '2025'
+            AND A.PELL_ELIGIBILITY = 'Y'
+    ) PLL ON population.EMPLID = PLL.EMPLID
+     ) 
+     select count(*) from NTP_Daily;
