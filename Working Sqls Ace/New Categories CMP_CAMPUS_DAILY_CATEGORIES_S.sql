@@ -3705,4 +3705,4 @@ FROM
             AND A.PELL_ELIGIBILITY = 'Y'
     ) PLL ON population.EMPLID = PLL.EMPLID
      ) 
-     select count(*) from NTP_Daily;
+     select * from NTP_Daily;
