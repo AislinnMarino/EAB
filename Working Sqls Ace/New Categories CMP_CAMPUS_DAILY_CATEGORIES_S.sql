@@ -3584,6 +3584,8 @@ FROM
 
 --no tests /transcripts with daily
  With NTP_Daily as(
+    Select * from ps_rpt.cmp_campus_daily_categories_S
+    MINUS
      -- no test scores/transcripts grant
      SELECT
     population.EMPLID AS STUDENT_ID,
@@ -3625,6 +3627,9 @@ FROM
 
      -- both pell and nott with daily
      With NTP_Daily as(
+    
+    Select * from ps_rpt.cmp_campus_daily_categories_S
+    MINUS
      -- no test scores/transcripts grant
      SELECT
     population.EMPLID AS STUDENT_ID,
@@ -3659,9 +3664,7 @@ FROM
                     AND t2.CAREERSOURCEKEY = t1.CAREERSOURCEKEY
             )
     ) NPCC ON population.EMPLID = NPCC.EMPLOYEEID 
-    Union 
-    Select * from ps_rpt.cmp_campus_daily_categories_S
-Union
+ MINUS
     --pell
     SELECT
     population.EMPLID AS STUDENT_ID,
@@ -3683,7 +3686,7 @@ FROM
                 SELECT
                     MAX(A_ED.EFFDT)
                 FROM
-                    ps_rpt.PS_ISIR_CONTROL A_ED
+                    ps_rpt.PS_ISIR_CONTROL_V A_ED
                 WHERE
                     A.EMPLID = A_ED.EMPLID
                     AND A.INSTITUTION = A_ED.INSTITUTION
@@ -3694,7 +3697,7 @@ FROM
                 SELECT
                     MAX(A_ES.EFFSEQ)
                 FROM
-                    ps_rpt.PS_ISIR_CONTROL A_ES
+                    ps_rpt.PS_ISIR_CONTROL_V A_ES
                 WHERE
                     A.EMPLID = A_ES.EMPLID
                     AND A.INSTITUTION = A_ES.INSTITUTION
@@ -3706,3 +3709,9 @@ FROM
     ) PLL ON population.EMPLID = PLL.EMPLID
      ) 
      select * from NTP_Daily;
+
+
+select count(*) from ps_rpt.cmp_campus_daily_categories_S;
+
+Select * from ps_rpt.cmp_campus_daily_categories_S;
+select * from PS_RPT.CMP_CATEGORY_LKP_V;
