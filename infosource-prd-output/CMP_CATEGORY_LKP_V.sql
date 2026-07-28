@@ -905,4 +905,18 @@ SELECT 'ATHL'                           AS Category_ID,
            'AI Undergraduate Majors - Includes Spec Pop'     AS Category_Desc,
            'UB'                          AS GROUP_ID
       FROM DUAL
+    UNION
+SELECT 'NPCC'                        AS Category_ID,
+           'No Pre-College Credit - UGRD'     AS Category_Desc,
+           'UB'                          AS GROUP_ID
+      FROM DUAL
+UNION
+SELECT DISTINCT
+    'Pell Elig- ' | | pe.ACADEMICYEAR AS Category_ID,
+    'Pell Eligible for Financial Aid Year ' | | pe.ACADEMICYEAR AS Category_Desc,
+    'UB' AS GROUP_ID
+FROM
+    PS_RPT.LOK_TERM_V pe
+WHERE
+    pe.SOURCEKEY >= '2111'
     ORDER BY Category_Desc
