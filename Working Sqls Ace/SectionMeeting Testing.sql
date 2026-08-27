@@ -4,6 +4,9 @@ select * from ps_rpt.cmp_section_v where course_number='101' and subject_cd='MGG
 select * from ps_rpt.cmp_osf_cs_courses_v where subject_cd='MGG' and course_no='101';
 select * from ps_rpt.ps_class_tbl where subject='MGG' and CATALOG_NBR =' 101LR';
 
+select class_stat from ps_rpt.ps_class_tbl where CLASS_STAT <> 'X';
+select class_stat from ps_rpt.ps_class_tbl where CLASS_STAT = 'I';
+select count(*) from ps_rpt.cmp_section_meeting_v;
 --base
 SELECT NVL (c.STRM, '')
                  AS TERM_CODE,
@@ -49,7 +52,7 @@ SELECT NVL (c.STRM, '')
                      'N'
              END
                  AS IS_ACTIVE
-        FROM PS_CLASS_TBL c
+        FROM ps_rpt.PS_CLASS_TBL c
              JOIN
              (SELECT m.CRSE_ID,
                      m.CLASS_SECTION,
@@ -72,29 +75,35 @@ SELECT NVL (c.STRM, '')
                      f.BLDG_CD,
                      f.ROOM,
                      f.DESCR     AS BLDG_NAME
-                FROM PS_CLASS_MTG_PAT m
-                     LEFT JOIN PS_FACILITY_TBL f
+                FROM ps_rpt.PS_CLASS_MTG_PAT m
+                     LEFT JOIN ps_rpt.PS_FACILITY_TBL f
                          ON m.FACILITY_ID = f.FACILITY_ID
-                     LEFT JOIN PS_BLDG_TBL b ON f.BLDG_CD = b.BLDG_CD
+                     LEFT JOIN ps_rpt.PS_BLDG_TBL b ON f.BLDG_CD = b.BLDG_CD
                WHERE     f.EFFDT = (SELECT MAX (ff.EFFDT)
-                                      FROM PS_FACILITY_TBL ff
+                                      FROM ps_rpt.PS_FACILITY_TBL ff
                                      WHERE f.FACILITY_ID = ff.FACILITY_ID)
                      AND B.EFFDT = (SELECT MAX (bb.effdt)
-                                      FROM PS_BLDG_TBL bb
+                                      FROM ps_rpt.PS_BLDG_TBL bb
                                      WHERE B.BLDG_CD = bb.bldg_cd)) mtg
                  ON     c.CRSE_ID = mtg.CRSE_ID
                     AND c.STRM = mtg.STRM
                     AND c.CLASS_SECTION = mtg.CLASS_SECTION
                     AND c.CRSE_OFFER_NBR = mtg.CRSE_OFFER_NBR
                     AND c.session_code = mtg.session_code
+                    
        WHERE     1 = 1
              AND C.ENRL_TOT > 0
+              and c.CLASS_NBR ='23932' and c.STRM='2269'
              AND c.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
                               FROM ps_rpt.cmp_filter_current_v cf)
+                            
     ORDER BY 2, 1;
 
 
 --tie active flag to course or section flag
+select * from ps_rpt.cmp_section_v where course_number='101' and subject_cd='MGG' and term_code='2269' and course_type_code='REC';
+select * from ps_rpt.ps_class_tbl where subject='MGG' and CATALOG_NBR =' 101LR';
+
 SELECT NVL (c.STRM, '')
                  AS TERM_CODE,
              NVL (c.CLASS_NBR, '')
@@ -130,7 +139,7 @@ SELECT NVL (c.STRM, '')
              mtg.FACILITY_ID
                  AS LOCATION_CD,
              CASE
-                 WHEN     ( sec.course_ref_no =c.CLASS_NBR )
+                 WHEN     (sec.course_ref_no =c.CLASS_NBR and sec.is_active='Y')
                       AND c.CLASS_STAT <> 'X'
                  THEN
                      'Y'
@@ -138,7 +147,8 @@ SELECT NVL (c.STRM, '')
                      'N'
              END
                  AS IS_ACTIVE
-        FROM PS_CLASS_TBL c
+        FROM ps_rpt.PS_CLASS_TBL c
+                 left Join ps_rpt.cmp_section_v sec on sec.course_ref_no =c.CLASS_NBR and sec.TERM_CODE =c.strm
              JOIN
              (SELECT m.CRSE_ID,
                      m.CLASS_SECTION,
@@ -161,25 +171,28 @@ SELECT NVL (c.STRM, '')
                      f.BLDG_CD,
                      f.ROOM,
                      f.DESCR     AS BLDG_NAME
-                FROM PS_CLASS_MTG_PAT m
-                     LEFT JOIN PS_FACILITY_TBL f
+                FROM ps_rpt.PS_CLASS_MTG_PAT m
+                     LEFT JOIN ps_rpt.PS_FACILITY_TBL f
                          ON m.FACILITY_ID = f.FACILITY_ID
-                     LEFT JOIN PS_BLDG_TBL b ON f.BLDG_CD = b.BLDG_CD
+                     LEFT JOIN ps_rpt.PS_BLDG_TBL b ON f.BLDG_CD = b.BLDG_CD
+                     
                WHERE     f.EFFDT = (SELECT MAX (ff.EFFDT)
-                                      FROM PS_FACILITY_TBL ff
+                                      FROM ps_rpt.PS_FACILITY_TBL ff
                                      WHERE f.FACILITY_ID = ff.FACILITY_ID)
                      AND B.EFFDT = (SELECT MAX (bb.effdt)
-                                      FROM PS_BLDG_TBL bb
+                                      FROM ps_rpt.PS_BLDG_TBL bb
                                      WHERE B.BLDG_CD = bb.bldg_cd)) mtg
                  ON     c.CRSE_ID = mtg.CRSE_ID
                     AND c.STRM = mtg.STRM
                     AND c.CLASS_SECTION = mtg.CLASS_SECTION
                     AND c.CRSE_OFFER_NBR = mtg.CRSE_OFFER_NBR
                     AND c.session_code = mtg.session_code
+         
        WHERE     1 = 1
              AND C.ENRL_TOT > 0
              AND c.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
                               FROM ps_rpt.cmp_filter_current_v cf)
+                              and c.CLASS_NBR ='23932' and c.STRM='2269'
     ORDER BY 2, 1;
 --tie active flag to class status
 
