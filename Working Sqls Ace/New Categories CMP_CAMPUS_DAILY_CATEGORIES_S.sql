@@ -3629,7 +3629,7 @@ FROM
 with ntp_daily as (
    select *
      from ps_rpt.cmp_campus_daily_categories_s
-   minus
+   MINUS
      -- no test scores/transcripts grant
    select population.emplid as student_id,
           'NPCC' as category_id
@@ -3659,7 +3659,7 @@ with ntp_daily as (
       )
    ) npcc
    on population.emplid = npcc.employeeid
-   minus
+   MINUS
     --pell
    select population.emplid as student_id,
           ( 'PELL ELIG- ' || pll.aid_year ) as category_id
@@ -3702,4 +3702,61 @@ select count(*) from ps_rpt.cmp_campus_daily_categories_S;
 Select * from ps_rpt.cmp_campus_daily_categories_S where student_id='50456736';
 select * from PS_RPT.CMP_CATEGORY_LKP_V;
 
-Select * from ps_rpt.cmp_campus_daily_categories_S;
+Select * from ps_rpt.cmp_campus_daily_categories_v where group_name='NPCC'; where student_id='50736576';
+
+
+SELECT
+    population.EMPLID AS STUDENT_ID,
+    'NPCC' AS CATEGORY_ID
+FROM
+    ps_rpt.cmp_POPULATION_CURRENT_V population
+    INNER JOIN (
+        SELECT
+            t1.EMPLOYEEID
+        FROM
+            PS_RPT.STUDENTTERM_V t1
+        WHERE
+            t1.INSTITUTIONSOURCEKEY = 'UBFLO'
+            AND t1.ADMITTYPESOURCEKEY IN ('001', '003')
+            AND t1.CAREERSOURCEKEY = t1.BILLINGCAREER
+            AND t1.CAREERSOURCEKEY = 'UGRD'
+            AND t1.TERMSOURCEKEY = t1.ADMITTERM
+            AND t1.ENROLLEDINDICATOR = 'Enrolled'
+            AND (t1.PSUNITSTESTCREDIT + t1.TERMTRANSFERCREDITS) = 0
+            AND NOT EXISTS (
+                SELECT
+                    'X'
+                FROM
+                    PS_RPT.STUDENTTERM_V t2
+                WHERE
+                    t2.INSTITUTIONSOURCEKEY = 'UBFLO'
+                    AND t2.CAREERSOURCEKEY = 'UGRD'
+                    AND t2.ENROLLEDINDICATOR = 'Enrolled'
+                    AND t2.PLANSOURCEKEY IN ('GIM074X3', 'ACP074R3')
+                    AND t2.EMPLOYEEID = t1.EMPLOYEEID
+                    AND t2.INSTITUTIONSOURCEKEY = t1.INSTITUTIONSOURCEKEY
+                    AND t2.CAREERSOURCEKEY = t1.CAREERSOURCEKEY
+            )
+    ) NPCC ON population.EMPLID = NPCC.EMPLOYEEID and population.emplid='50741400';
+
+    select * from PS_RPT.STUDENTTERM_V t1  where t1.EMPLOYEEID='50736576' and
+            t1.INSTITUTIONSOURCEKEY = 'UBFLO'
+            AND t1.ADMITTYPESOURCEKEY IN ('001', '003')
+            AND t1.CAREERSOURCEKEY = t1.BILLINGCAREER
+            AND t1.CAREERSOURCEKEY = 'UGRD'
+            AND t1.TERMSOURCEKEY = t1.ADMITTERM
+            AND t1.ENROLLEDINDICATOR = 'Enrolled'
+            AND (t1.PSUNITSTESTCREDIT + t1.TERMTRANSFERCREDITS) = 0;
+
+select 
+                    'X'
+                FROM
+                    PS_RPT.STUDENTTERM_V t2
+                WHERE
+                    t2.INSTITUTIONSOURCEKEY = 'UBFLO'
+                    AND t2.CAREERSOURCEKEY = 'UGRD'
+                    AND t2.ENROLLEDINDICATOR = 'Enrolled'
+                    AND t2.PLANSOURCEKEY IN ('GIM074X3', 'ACP074R3')
+                    
+                    
+                    and t2.EMPLOYEEID='50736576';
