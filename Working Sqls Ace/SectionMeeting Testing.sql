@@ -23,7 +23,18 @@ select * from ps_rpt.cmp_section_v;
 select class_stat from ps_rpt.ps_class_tbl where CLASS_STAT <> 'X';
 select distinct class_stat from ps_rpt.ps_class_tbl; 
 
-select count(*) from ps_rpt.cmp_section_meeting_v;
+
+/*CASE
+                 WHEN     (   (to_char(mtg.START_DT, 'MM-DD-YYYY') > TO_CHAR(SYSDATE, 'MM-DD-YYYY'))
+                           OR (to_char(SYSDATE, 'MM-DD-YYYY') BETWEEN TO_CHAR(mtg.START_DT, 'MM-DD-YYYY') AND to_char(mtg.END_DT, 'MM-DD-YYYY')))
+                      AND c.CLASS_STAT <> 'X'
+                 THEN
+                     'Y'
+                 ELSE
+                     'N'
+             END*/
+
+select * from ps_rpt.cmp_section_meeting_v;
 --section meeting base with sysdate change
 SELECT NVL (c.STRM, '')
                  AS TERM_CODE,
@@ -60,8 +71,8 @@ SELECT NVL (c.STRM, '')
              mtg.FACILITY_ID
                  AS LOCATION_CD,
              CASE
-                 WHEN     (   (mtg.START_DT > TRUNC(SYSDATE - 3) )
-                           OR (TRUNC(SYSDATE - 3)  BETWEEN mtg.START_DT AND mtg.END_DT))
+                 WHEN     (   (to_DATE(mtg.START_DT, 'DD-MM-YYYY') > TO_DATE(SYSDATE, 'DD-MM-YYYY'))
+                           OR (to_DATE(SYSDATE, 'DD-MM-YYYY') BETWEEN to_DATE(mtg.START_DT, 'DD-MM-YYYY') AND to_DATE(mtg.END_DT, 'DD-MM-YYYY')))
                       AND c.CLASS_STAT <> 'X'
                  THEN
                      'Y'
@@ -110,10 +121,9 @@ SELECT NVL (c.STRM, '')
                     
        WHERE     1 = 1
              AND C.ENRL_TOT > 0
-              and c.CLASS_NBR ='21841' and c.STRM='2269'
              AND c.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
                               FROM ps_rpt.cmp_filter_current_v cf)
-                            
+                          
     ORDER BY 2, 1;
 
 
@@ -157,7 +167,7 @@ WITH Section
                      B.end_dt AS Class_End_Dt,
                      'N' AS is_unlimited_seating,
                      ' ' AS section_type,
-                     CASE WHEN to_char(B.end_dt,'MM-DD-YYYY')>= TO_CHAR(SYSDATE, 'MM-DD-YYYY') THEN 'Y' ELSE 'N' END
+                     CASE WHEN to_DATE(B.end_dt,'DD-MM-YYYY')>= TO_DATE(SYSDATE, 'DD-MM-YYYY') THEN 'Y' ELSE 'N' END
                         AS is_active
                 FROM ps_rpt.PS_CLASS_TBL a
                      LEFT JOIN ps_rpt.PS_CLASS_MTG_PAT B
@@ -217,7 +227,7 @@ WITH Section
                      AND a.enrl_tot > 0
                      AND a.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
                                       FROM ps_rpt.cmp_filter_current_v cf)
-                                    and b.end_dt='31-AUG-26'  
+                                      
             ORDER BY a.subject, a.catalog_nbr)
      SELECT SECTION_NAME,
             COURSE_NUMBER,
