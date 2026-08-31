@@ -3,6 +3,7 @@ select * from ps_rpt.cmp_section_meeting_v where course_ref_no='21969' and term_
 select * from ps_rpt.cmp_section_meeting_v where course_ref_no='21781' and term_code='2269';
 select * from ps_rpt.cmp_section_v where course_number='101' and subject_cd='MGG' and term_code='2269' and course_type_code='REC' and section_name='A1' ;
 
+--c1
 select * from ps_rpt.cmp_section_meeting_v where course_ref_no='21978' and term_code='2269';
 select * from ps_rpt.cmp_section_v where course_number='101' and subject_cd='MGG' and term_code='2269' and course_type_code='REC' and section_name='C1' ;
 
@@ -23,7 +24,7 @@ select class_stat from ps_rpt.ps_class_tbl where CLASS_STAT <> 'X';
 select distinct class_stat from ps_rpt.ps_class_tbl; 
 
 select count(*) from ps_rpt.cmp_section_meeting_v;
---base
+--section meeting base with sysdate change
 SELECT NVL (c.STRM, '')
                  AS TERM_CODE,
              NVL (c.CLASS_NBR, '')
@@ -120,102 +121,22 @@ SELECT NVL (c.STRM, '')
 select * from ps_rpt.cmp_section_v where course_number='101' and subject_cd='MGG' and term_code='2269' and course_type_code='REC';
 select * from ps_rpt.ps_class_tbl where subject='MGG' and CATALOG_NBR =' 101LR';
 
-SELECT NVL (c.STRM, '')
-                 AS TERM_CODE,
-             NVL (c.CLASS_NBR, '')
-                 AS COURSE_REF_NO,
-             NVL (mtg.CLASS_MTG_NBR, '')
-                 AS MEET_NUMBER,
-             NVL (mtg.ROOM, '')
-                 AS MEET_ROOM_CODE,
-             NVL (mtg.BLDG_NAME, '')
-                 AS MEET_BUILDING_CODE,
-             CASE WHEN mtg.MON = 'Y' THEN 'M' ELSE '' END
-                 AS MEET_MONDAY,
-             CASE WHEN mtg.TUES = 'Y' THEN 'T' ELSE '' END
-                 AS MEET_TUESDAY,
-             CASE WHEN mtg.WED = 'Y' THEN 'W' ELSE '' END
-                 AS MEET_WEDNESDAY,
-             CASE WHEN mtg.THURS = 'Y' THEN 'R' ELSE '' END
-                 AS MEET_THURSDAY,
-             CASE WHEN mtg.FRI = 'Y' THEN 'F' ELSE '' END
-                 AS MEET_FRIDAY,
-             CASE WHEN mtg.SAT = 'Y' THEN 'Sa' ELSE '' END
-                 AS MEET_SATURDAY,
-             CASE WHEN mtg.SUN = 'Y' THEN 'Su' ELSE '' END
-                 AS MEET_SUNDAY,
-             NVL (TO_CHAR (mtg.MEETING_TIME_START, 'HH24MI'), '')
-                 AS START_TIME,
-             NVL (TO_CHAR (mtg.MEETING_TIME_END, 'HH24MI'), '')
-                 AS END_TIME,
-             NVL (mtg.START_DT, '')
-                 AS BEGIN_DATE,
-             NVL (mtg.END_DT, '')
-                 AS END_DATE,
-             mtg.FACILITY_ID
-                 AS LOCATION_CD,
-             CASE
-                 WHEN     (sec.course_ref_no =c.CLASS_NBR and sec.is_active='Y')
-                      AND c.CLASS_STAT <> 'X'
-                 THEN
-                     'Y'
-                 ELSE
-                     'N'
-             END
-                 AS IS_ACTIVE
-        FROM ps_rpt.PS_CLASS_TBL c
-                 left Join ps_rpt.cmp_section_v sec on sec.course_ref_no =c.CLASS_NBR and sec.TERM_CODE =c.strm
-             JOIN
-             (SELECT m.CRSE_ID,
-                     m.CLASS_SECTION,
-                     m.CRSE_OFFER_NBR,
-                     m.CLASS_MTG_NBR,
-                     m.STRM,
-                     m.session_code,
-                     m.MEETING_TIME_START,
-                     m.MEETING_TIME_END,
-                     m.START_DT,
-                     m.END_DT,
-                     m.MON,
-                     m.TUES,
-                     m.WED,
-                     m.THURS,
-                     m.FRI,
-                     m.SAT,
-                     m.SUN,
-                     f.FACILITY_ID,
-                     f.BLDG_CD,
-                     f.ROOM,
-                     f.DESCR     AS BLDG_NAME
-                FROM ps_rpt.PS_CLASS_MTG_PAT m
-                     LEFT JOIN ps_rpt.PS_FACILITY_TBL f
-                         ON m.FACILITY_ID = f.FACILITY_ID
-                     LEFT JOIN ps_rpt.PS_BLDG_TBL b ON f.BLDG_CD = b.BLDG_CD
-                     
-               WHERE     f.EFFDT = (SELECT MAX (ff.EFFDT)
-                                      FROM ps_rpt.PS_FACILITY_TBL ff
-                                     WHERE f.FACILITY_ID = ff.FACILITY_ID)
-                     AND B.EFFDT = (SELECT MAX (bb.effdt)
-                                      FROM ps_rpt.PS_BLDG_TBL bb
-                                     WHERE B.BLDG_CD = bb.bldg_cd)) mtg
-                 ON     c.CRSE_ID = mtg.CRSE_ID
-                    AND c.STRM = mtg.STRM
-                    AND c.CLASS_SECTION = mtg.CLASS_SECTION
-                    AND c.CRSE_OFFER_NBR = mtg.CRSE_OFFER_NBR
-                    AND c.session_code = mtg.session_code
-         
-       WHERE     1 = 1
-             AND C.ENRL_TOT > 0
-             AND c.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
-                              FROM ps_rpt.cmp_filter_current_v cf)
-                              and c.CLASS_NBR ='23932' and c.STRM='2269'
-    ORDER BY 2, 1;
---tie active flag to class status
 
+select * from ps_rpt.cmp_section_v where class_end_dt='31-AUG-2026';
 --tied to term dates(this is bad)
 
-select TRUNC(SYSDATE - 3);
---section
+SELECT TO_CHAR
+    (SYSDATE, 'MM-DD-YYYY ') "NOW"
+     FROM DUAL;
+
+     SELECT TO_CHAR(SYSDATE, 'MM-DD-YYYY') FROM DUAL;
+     SELECT SYSDATE FROM dual;
+     select to_char(B.end_dt,'MM-DD-YYYY') from ps_rpt.PS_CLASS_MTG_PAT B ;
+
+     --and B.start_dt='01-SEP-26'
+                                      --and a.CLASS_NBR ='21841' and a.STRM='2269'
+--section with sysdate change 
+select * from ps_rpt.cmp_section_v;
 WITH Section
         AS (  SELECT NVL (TRIM (a.CLASS_SECTION), '') AS SECTION_NAME,
                      NVL (TRIM (REGEXP_SUBSTR (a.catalog_nbr, '\d+')), '')
@@ -236,7 +157,7 @@ WITH Section
                      B.end_dt AS Class_End_Dt,
                      'N' AS is_unlimited_seating,
                      ' ' AS section_type,
-                     CASE WHEN B.end_dt >= TRUNC(SYSDATE - 3) THEN 'Y' ELSE 'N' END
+                     CASE WHEN to_char(B.end_dt,'MM-DD-YYYY')>= TO_CHAR(SYSDATE, 'MM-DD-YYYY') THEN 'Y' ELSE 'N' END
                         AS is_active
                 FROM ps_rpt.PS_CLASS_TBL a
                      LEFT JOIN ps_rpt.PS_CLASS_MTG_PAT B
@@ -296,7 +217,7 @@ WITH Section
                      AND a.enrl_tot > 0
                      AND a.STRM >= (SELECT cf.lookback_term --Rolling filter to grab only terms up to a year ago
                                       FROM ps_rpt.cmp_filter_current_v cf)
-                                      and a.CLASS_NBR ='21841' and a.STRM='2269'
+                                    and b.end_dt='31-AUG-26'  
             ORDER BY a.subject, a.catalog_nbr)
      SELECT SECTION_NAME,
             COURSE_NUMBER,
