@@ -533,7 +533,7 @@ SELECT /*+ PARALLEL(4) */
                                         A.CAR_LEV
                            ORDER BY A.TERMSOURCEKEY DESC, A.ADMITTERM DESC
                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)    Current_Status
-              FROM (SELECT A.INSTITUTIONSOURCEKEY,
+              FROM (SELECT DISTINCT A.INSTITUTIONSOURCEKEY,
                            A.EMPLOYEEID,
                            A.CAREERSOURCEKEY,
                            (CASE
@@ -606,7 +606,7 @@ SELECT /*+ PARALLEL(4) */
                                         A.CAR_LEV
                            ORDER BY A.TERMSOURCEKEY, A.ADMITTERM
                            ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)    Current_Status
-              FROM (SELECT A.INSTITUTIONSOURCEKEY,
+              FROM (SELECT DISTINCT A.INSTITUTIONSOURCEKEY,
                            A.EMPLOYEEID,
                            A.CAREERSOURCEKEY,
                            (CASE
@@ -711,7 +711,7 @@ SELECT /*+ PARALLEL(4) */
                   FROM PS_RPT.PS_STDNT_ADVR_HIST_V b
                  WHERE a.emplid = b.emplid AND a.institution = b.institution)
            AND a.EMPLID IN
-                   (SELECT A.EMPLOYEEID
+                   (SELECT DISTINCT A.EMPLOYEEID
                       FROM PS_RPT.STUDENTTERM_V  A
                            INNER JOIN PS_RPT.LOK_TERM_V T1
                                ON A.TERMSOURCEKEY = T1.SOURCEKEY
@@ -3526,7 +3526,7 @@ SELECT
 FROM
     ps_rpt.cmp_POPULATION_CURRENT_V population
     INNER JOIN (
-        SELECT
+        SELECT DISTINCT
             t1.EMPLOYEEID
         FROM
             PS_RPT.STUDENTTERM_V t1
@@ -3539,7 +3539,7 @@ FROM
             AND t1.ENROLLEDINDICATOR = 'Enrolled'
             AND (t1.PSUNITSTESTCREDIT + t1.TERMTRANSFERCREDITS) = 0
             AND NOT EXISTS (
-                SELECT
+                SELECT DISTINCT
                     'X'
                 FROM
                     PS_RPT.STUDENTTERM_V t2

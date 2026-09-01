@@ -18,7 +18,7 @@ WITH Section
                      B.end_dt AS Class_End_Dt,
                      'N' AS is_unlimited_seating,
                      ' ' AS section_type,
-                     CASE WHEN B.end_dt >= SYSDATE THEN 'Y' ELSE 'N' END
+                     CASE WHEN to_DATE(B.end_dt,'DD-MM-YYYY')>= TO_DATE(SYSDATE, 'DD-MM-YYYY') THEN 'Y' ELSE 'N' END
                         AS is_active
                 FROM ps_rpt.PS_CLASS_TBL a
                      LEFT JOIN ps_rpt.PS_CLASS_MTG_PAT B
