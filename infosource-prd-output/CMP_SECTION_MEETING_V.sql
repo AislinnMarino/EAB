@@ -33,8 +33,8 @@ SELECT NVL (c.STRM, '')
              mtg.FACILITY_ID
                  AS LOCATION_CD,
              CASE
-                 WHEN     (   (mtg.START_DT > SYSDATE)
-                           OR (SYSDATE BETWEEN mtg.START_DT AND mtg.END_DT))
+                 WHEN     (   (to_DATE(mtg.START_DT, 'DD-MM-YYYY') > TO_DATE(SYSDATE, 'DD-MM-YYYY'))
+                           OR (to_DATE(SYSDATE, 'DD-MM-YYYY') BETWEEN to_DATE(mtg.START_DT, 'DD-MM-YYYY') AND to_DATE(mtg.END_DT, 'DD-MM-YYYY')))
                       AND c.CLASS_STAT <> 'X'
                  THEN
                      'Y'
